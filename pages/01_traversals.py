@@ -3,33 +3,35 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from graph import Graph
 from ui_utils import draw_graph, run_graph_input
 
 # Настройка страницы
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-matrix, adj_list, viz_matrix, processor = run_graph_input()
+matrix, adj_list, viz_matrix, is_directed, processor = run_graph_input(
+    force_weighted=False
+)
 
 # Algo selection
 tab1, tab2, tab3, tab4 = st.tabs(
-    ["1. Показ DFS", "2. Проверка DFS", "3. Показ BFS", "4. Проверка BFS"]
+    ["1. Построение DFS", "2. Проверка DFS", "3. Построение BFS", "4. Проверка BFS"]
 )
 
 # Обработка
 with tab1:
-    st.subheader("Демонстрация обхода в глубину")
-    # Код алгоритма и визуализация для задачи 1
-    if st.button("Запустить DFS"):
-        # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-        result = (
-            processor.get_dfs(start_node)
-            if "DFS" in page
-            else processor.get_bfs(start_node)
-        )
-        st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
-        st.session_state["traversal_result"] = result
+    # st.subheader("Демонстрация обхода в глубину")
+    # # Код алгоритма и визуализация для задачи 1
+    # if st.button("Запустить DFS"):
+    #     # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
+    #     result = (
+    #         processor.get_dfs(start_node)
+    #         if "DFS" in page
+    #         else processor.get_bfs(start_node)
+    #     )
+    #     st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
+    #     st.session_state["traversal_result"] = result
+    pass
 
 with tab2:
     st.subheader("Проверьте свои знания DFS")
@@ -37,28 +39,27 @@ with tab2:
         "Введите обход (через пробел)", placeholder="Напр: 0 1 2 4", key="DFS"
     )
     if st.button("Проверить DFS"):
-        try:
-            user_list = list(map(int, user_input.split()))
-            if processor.verify_dfs(user_list):
-                st.balloons()
-                st.success("Верно!")
-            else:
-                st.error(f"Неверно. Ваш ввод: {user_list}")
-        except ValueError:
-            st.error("Введите целые числа через пробел")
+        user_list = list(map(int, user_input.split()))
+        if processor.verify_dfs(user_list):
+            st.success("Верно!")
+            st.session_state["traversal_result"] = user_list
+        else:
+            st.error(f"Неверно. Ваш ввод: {user_list}")
+
 
 with tab3:
-    st.subheader("Демонстрация обхода в ширину")
-    # Код алгоритма и визуализация для задачи 1
-    if st.button("Запустить BFS"):
-        # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-        result = (
-            processor.get_dfs(start_node)
-            if "DFS" in page
-            else processor.get_bfs(start_node)
-        )
-        st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
-        st.session_state["traversal_result"] = result
+    # st.subheader("Демонстрация обхода в ширину")  # TODO
+    # # Код алгоритма и визуализация для задачи 1
+    # if st.button("Запустить BFS"):
+    #     # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
+    #     result = (
+    #         processor.get_dfs(start_node)
+    #         if "DFS" in page
+    #         else processor.get_bfs(start_node)
+    #     )
+    #     st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
+    #     st.session_state["traversal_result"] = result
+    pass
 
 with tab4:
     st.subheader("Проверьте свои знания BFS")
@@ -66,21 +67,30 @@ with tab4:
         "Введите обход (через пробел)", placeholder="Напр: 0 1 2 4", key="BFS"
     )
     if st.button("Проверить BFS"):
-        try:
-            user_list = list(map(int, user_input.split()))
-            if processor.verify_dfs(user_list):
-                st.balloons()
-                st.success("Верно!")
-            else:
-                st.error(f"Неверно. Ваш ввод: {user_list}")
-        except ValueError:
-            st.error("Введите целые числа через пробел")
+        user_list = list(map(int, user_input.split()))
+        if processor.verify_bfs(user_list):
+            st.success("Верно!")
+            # st.session_state["traversal_result"] = user_list
+        else:
+            st.error(f"Неверно. Ваш ввод: {user_list}")
 
 
 # Визуализация
 st.divider()
 st.subheader("Визуализация")
 
+# Инициализация состояний для визуализации
+if "traversal_result" not in st.session_state:
+    st.session_state["traversal_result"] = None
+
 # Подсвечиваем путь, если алгоритм был запущен
-highlight = st.session_state.get("traversal_result", None)
-draw_graph(viz_matrix, highlight_nodes=highlight)
+traversal_nodes = st.session_state.get("traversal_result", [])
+highlight_edges = []
+if traversal_nodes and len(traversal_nodes) > 1:
+    # Создаем пары (u, v) из последовательности вершин
+    highlight_edges = [
+        (traversal_nodes[i], traversal_nodes[i + 1])
+        for i in range(len(traversal_nodes) - 1)
+    ]
+st.warning(traversal_nodes)
+draw_graph(viz_matrix, highlight_edges=highlight_edges)

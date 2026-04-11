@@ -11,7 +11,9 @@ from ui_utils import run_graph_input
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-matrix, adj_list, viz_matrix, processor = run_graph_input()
+matrix, adj_list, viz_matrix, is_directed, processor = run_graph_input(
+    force_directed=False
+)
 
 
 st.subheader("12. Раскраска графа")

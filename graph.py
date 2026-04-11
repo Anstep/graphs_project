@@ -23,7 +23,8 @@ class Graph:
             self.adj_matrix = np.zeros((vertices_count, vertices_count), dtype=int)
             for vertex, neighbors_list in adj_list.items():
                 for neighbor in neighbors_list:
-                    self.adj_matrix[vertex][neighbor] = 1
+                    # neighbor стал кортежем
+                    self.adj_matrix[vertex][neighbor[0]] = 1
         elif inc_matrix is not None:
             pass
         elif adj_list_weighted:
@@ -158,7 +159,22 @@ class Graph:
 
     # Задача 5
     def get_connected_components_count(self):
-        pass
+        # TODO ЗАГЛУШКА ПОКА НАСТЯ НЕ ДАЛА РЕШЕНИЕ
+        visited = [False] * self.v_count
+        count = 0
+        adj_list = self.get_adj_list()
+        for i in range(self.v_count):
+            if not visited[i]:
+                count += 1
+                stack = [i]
+                visited[i] = True
+                while stack:
+                    u = stack.pop()
+                    for v in adj_list[u]:
+                        if not visited[v]:
+                            visited[v] = True
+                            stack.append(v)
+        return count
 
     # Задача 6
     def verify_components_count(self, user_count):

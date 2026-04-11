@@ -3,14 +3,15 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from ui_utils import draw_graph, run_graph_input
+from ui_utils import draw_graph, run_graph_input, validate_weighted_graph_constraints
 
 # Настройка страницы
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-matrix, adj_list, viz_matrix, processor = run_graph_input()
-
+matrix, adj_list, viz_matrix, is_directed, processor = run_graph_input(
+    force_weighted=True
+)
 
 # Algo selection
 tab1, tab2, tab3 = st.tabs(
@@ -27,40 +28,56 @@ with tab1:
     # Код алгоритма и визуализация для задачи 1
     if st.button("Построить"):
         # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-        result = processor.get_connected_components_count()
-        st.success(f"Количество компоент: {result}")
-        st.session_state["traversal_result"] = result
+        error = validate_weighted_graph_constraints(
+            viz_matrix, is_directed, "MST", processor
+        )
+        if error:
+            if "Ошибка" in error:
+                st.error(error)
+                st.stop()
+            else:
+                st.warning(error)
+        st.session_state["highlight_edges"] = processor.get_minimal_spanning_tree()
+        st.success("Дерево построено")
+
 
 with tab2:
     st.subheader("Нахождение кратчайших путей от вершины")
     user_start_vertex = st.selectbox(
         label="Вершина",
         options=[v for v in range(len(viz_matrix))],
-        # key=f"ms_{i}",
-        key="vertex_dejikstra",
+        key="vertex_dijkstra",
     )
     if st.button("Найти", key="button_dejikstra"):  # TODO
+        error = validate_weighted_graph_constraints(viz_matrix, is_directed, "Dijkstra")
+        if error:
+            st.error(error)
+            st.stop()
+
+        st.session_state["highlight_edges"] = None
         shortest_paths = processor.get_shortest_paths_from(user_start_vertex)
-        shortest_paths = {i: val for i, val in enumerate(shortest_paths)}
         cols = st.columns(len(shortest_paths))
-        for i, val in shortest_paths.items():
-            cols[i].metric(f"V{i}", val)
+        for i, val in enumerate(shortest_paths):
+            cols[i].metric(f"V{i}", "∞" if val == -1 else val)
 
 with tab3:
     st.subheader("Нахождение матрицы кратчайших путей")
     if st.button("Найти", key="button_matrix"):
-        try:  # TODO
-            user_input = user_input
-            if processor.verify_components_count(user_input):
-                st.balloons()
-                st.success("Верно!")
-            else:
-                st.error(f"Неверно. Попробуйте еще раз")
-        except ValueError:
-            st.error("")  # !!
+        st.session_state["highlight_edges"] = None
+        dist_matrix = processor.get_matrix_shortest_paths()
+        st.dataframe(pd.DataFrame(dist_matrix))
 
 # --- Визуализация (универсальный блок) ---
 st.divider()
 st.subheader("Визуализация")
 
-draw_graph(viz_matrix, is_weighted=True, is_directed=True)
+# Инициализация состояний для визуализации
+if "highlight_edges" not in st.session_state:
+    st.session_state["highlight_edges"] = None
+
+draw_graph(
+    viz_matrix,
+    highlight_edges=st.session_state.get("highlight_edges"),
+    is_weighted=True,
+    is_directed=is_directed,
+)

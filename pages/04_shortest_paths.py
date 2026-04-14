@@ -9,39 +9,17 @@ from ui_utils import draw_graph, run_graph_input, validate_weighted_graph_constr
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-matrix, adj_list, viz_matrix, is_directed, processor = run_graph_input(
-    force_weighted=True
-)
+viz_matrix, is_directed, processor = run_graph_input(force_weighted=True)
 
 # Algo selection
-tab1, tab2, tab3 = st.tabs(
+tab1, tab2 = st.tabs(
     [
-        "7. Построение минимального остовного дерева",
         "8. Нахождение кратчайших путей от вершины",
         "9. Нахождение матрицы кратчайших путей",
     ]
 )
 
-# Обработка
 with tab1:
-    st.subheader("Построение минимального остовного дерева")
-    # Код алгоритма и визуализация для задачи 1
-    if st.button("Построить"):
-        # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-        error = validate_weighted_graph_constraints(
-            viz_matrix, is_directed, "MST", processor
-        )
-        if error:
-            if "Ошибка" in error:
-                st.error(error)
-                st.stop()
-            else:
-                st.warning(error)
-        st.session_state["highlight_edges"] = processor.get_minimal_spanning_tree()
-        st.success("Дерево построено")
-
-
-with tab2:
     st.subheader("Нахождение кратчайших путей от вершины")
     user_start_vertex = st.selectbox(
         label="Вершина",
@@ -60,7 +38,7 @@ with tab2:
         for i, val in enumerate(shortest_paths):
             cols[i].metric(f"V{i}", "∞" if val == -1 else val)
 
-with tab3:
+with tab2:
     st.subheader("Нахождение матрицы кратчайших путей")
     if st.button("Найти", key="button_matrix"):
         st.session_state["highlight_edges"] = None

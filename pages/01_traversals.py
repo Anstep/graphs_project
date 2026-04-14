@@ -9,9 +9,7 @@ from ui_utils import draw_graph, run_graph_input
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-matrix, adj_list, viz_matrix, is_directed, processor = run_graph_input(
-    force_weighted=False
-)
+viz_matrix, is_directed, processor = run_graph_input(force_weighted=False)
 
 # Algo selection
 tab1, tab2, tab3, tab4 = st.tabs(
@@ -92,5 +90,6 @@ if traversal_nodes and len(traversal_nodes) > 1:
         (traversal_nodes[i], traversal_nodes[i + 1])
         for i in range(len(traversal_nodes) - 1)
     ]
-st.warning(traversal_nodes)
+    st.warning(traversal_nodes)
+
 draw_graph(viz_matrix, highlight_edges=highlight_edges)

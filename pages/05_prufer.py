@@ -11,9 +11,7 @@ from ui_utils import run_graph_input
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-matrix, adj_list, viz_matrix, is_directed, processor = run_graph_input(
-    force_directed=False
-)
+viz_matrix, is_directed, processor = run_graph_input(force_directed=False)
 
 # Algo selection
 tab1, tab2 = st.tabs(
@@ -25,12 +23,9 @@ tab1, tab2 = st.tabs(
 
 with tab1:
     st.subheader("Найти код прюфера")
-    # Код алгоритма и визуализация для задачи 1
     if st.button("Найти"):
-        # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-        result = processor.get_connected_components_count()
-        st.success(f"Количество компоент: {result}")
-        st.session_state["traversal_result"] = result
+        result = processor.encode_prufer()
+        st.success(f"Код: {result}")
 
 with tab2:
     st.subheader("Декодировать код прюфера")

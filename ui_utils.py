@@ -311,7 +311,7 @@ def run_graph_input(
                     viz_matrix[u][u] = col[u] if is_weighted else 1
 
             processor = Graph(n_vertices, adj_matrix=viz_matrix)
-    return matrix, adj_list, viz_matrix, is_directed, processor
+    return viz_matrix, is_directed, processor
 
 
 def draw_graph(

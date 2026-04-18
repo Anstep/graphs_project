@@ -4,13 +4,14 @@ import streamlit as st
 import streamlit.components.v1 as components
 from pyvis.network import Network
 
+from core.algorithms import Algos
 from ui_utils import draw_graph, run_graph_input
 
 # Настройка страницы
 st.set_page_config(layout="wide", page_title="Характеристики графа")
 
 # Ввод графа
-viz_matrix, is_directed, processor = run_graph_input()
+graph = run_graph_input()
 
 # Обработка и вывод
 st.subheader("Характеристики графа")
@@ -21,7 +22,7 @@ if st.session_state.get("calculated"):
     st.divider()
 
     # 1.Степени вершин
-    degrees = processor.get_vertex_degrees()
+    degrees = Algos.get_vertices_degrees(graph)
 
     st.subheader("Степени каждой вершины")
     # Вывод степеней в два ряда
@@ -35,12 +36,12 @@ if st.session_state.get("calculated"):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        comp_count = processor.get_connected_components_count()
+        comp_count = Algos.get_connected_components_count(graph)
         st.write("**Число компонент:**")
         st.info(f"{comp_count}")
 
     with col2:
-        is_euler = processor.get_eulerian_status()
+        is_euler = Algos.get_eulerian_status(graph)
         st.write("**Эйлеровость:**")
         if is_euler:
             st.success(f"Эйлеров")
@@ -48,7 +49,7 @@ if st.session_state.get("calculated"):
             st.warning(f"Не Эйлеров")
 
     with col3:
-        is_bipartite = processor.get_bipartite_status()
+        is_bipartite = Algos.get_bipartite_status(graph)
         st.write("**Двудольность:**")
         if is_bipartite:
             st.success("Граф двудольный")
@@ -60,4 +61,4 @@ if st.session_state.get("calculated"):
 st.divider()
 st.subheader("Визуализация")
 
-draw_graph(viz_matrix)
+draw_graph(graph)

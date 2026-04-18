@@ -1,17 +1,13 @@
-import numpy as np
-import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
-from pyvis.network import Network
 
+from core.algorithms import Algos
 from ui_utils import draw_graph, run_graph_input
 
 # Настройка страницы
-st.set_page_config(layout="wide", page_title="Обходы")
+st.set_page_config(layout="wide", page_title="Компоненты")
 
 # Ввод графа
-viz_matrix, is_directed, processor = run_graph_input()
-
+graph = run_graph_input()
 
 # Algo selection
 tab1, tab2 = st.tabs(
@@ -21,22 +17,20 @@ tab1, tab2 = st.tabs(
 # Обработка
 with tab1:
     st.subheader("Подсчет числа компонент связности")
-    # Код алгоритма и визуализация для задачи 1
     if st.button("Подсчитать"):
-        # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-        result = processor.get_connected_components_count()
+        result = Algos.get_connected_components_count(graph)
         st.success(f"Количество компоент: {result}")
         st.session_state["traversal_result"] = result
 
 with tab2:
     st.subheader("Проверка числа компонент связности")
-    user_input = st.text_input(
-        "Введите обход (через пробел)", placeholder="Напр: 2", key="component_count"
+    user_input = int(
+        st.text_input("Введите число", placeholder="Напр: 2", key="component_count")
     )
     if st.button("Проверить"):
         try:
             user_input = user_input
-            if processor.verify_components_count(user_input):
+            if Algos.verify_components_count(graph, user_input):
                 st.balloons()
                 st.success("Верно!")
             else:
@@ -44,9 +38,8 @@ with tab2:
         except ValueError:
             st.error("")  # !!
 
-# Подсвечиваем путь, если алгоритм был запущен
 # Визуализация
 st.divider()
 st.subheader("Визуализация")
 
-draw_graph(viz_matrix)
+draw_graph(graph)

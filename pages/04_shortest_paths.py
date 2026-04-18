@@ -1,15 +1,14 @@
-import numpy as np
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
 
-from ui_utils import draw_graph, run_graph_input, validate_weighted_graph_constraints
+from core.algorithms import Algos
+from ui_utils import draw_graph, run_graph_input
 
 # Настройка страницы
-st.set_page_config(layout="wide", page_title="Обходы")
+st.set_page_config(layout="wide", page_title="Кратчайшие пути")
 
 # Ввод графа
-viz_matrix, is_directed, processor = run_graph_input(force_weighted=True)
+graph = run_graph_input(force_weighted=True)
 
 # Algo selection
 tab1, tab2 = st.tabs(
@@ -23,17 +22,17 @@ with tab1:
     st.subheader("Нахождение кратчайших путей от вершины")
     user_start_vertex = st.selectbox(
         label="Вершина",
-        options=[v for v in range(len(viz_matrix))],
+        options=[v for v in range(graph.get_vertices_count())],
         key="vertex_dijkstra",
     )
     if st.button("Найти", key="button_dejikstra"):  # TODO
-        error = validate_weighted_graph_constraints(viz_matrix, is_directed, "Dijkstra")
-        if error:
-            st.error(error)
-            st.stop()
+        # error = validate_weighted_graph_constraints(viz_matrix, is_directed, "Dijkstra")
+        # if error:
+        #     st.error(error)
+        #     st.stop()
 
         st.session_state["highlight_edges"] = None
-        shortest_paths = processor.get_shortest_paths_from(user_start_vertex)
+        shortest_paths = Algos.get_shortest_paths_from(graph, user_start_vertex)
         cols = st.columns(len(shortest_paths))
         for i, val in enumerate(shortest_paths):
             cols[i].metric(f"V{i}", "∞" if val == -1 else val)
@@ -42,10 +41,10 @@ with tab2:
     st.subheader("Нахождение матрицы кратчайших путей")
     if st.button("Найти", key="button_matrix"):
         st.session_state["highlight_edges"] = None
-        dist_matrix = processor.get_matrix_shortest_paths()
+        dist_matrix = Algos.get_matrix_shortest_paths(graph)
         st.dataframe(pd.DataFrame(dist_matrix))
 
-# --- Визуализация (универсальный блок) ---
+# Визуализация
 st.divider()
 st.subheader("Визуализация")
 
@@ -54,8 +53,6 @@ if "highlight_edges" not in st.session_state:
     st.session_state["highlight_edges"] = None
 
 draw_graph(
-    viz_matrix,
+    graph,
     highlight_edges=st.session_state.get("highlight_edges"),
-    is_weighted=True,
-    is_directed=is_directed,
 )

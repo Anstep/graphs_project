@@ -4,6 +4,7 @@ from math import inf
 
 
 class Algos:
+    #
     @staticmethod
     def get_vertices_degrees(graph):
         pass
@@ -23,26 +24,23 @@ class Algos:
 
     # Задача 2
     @staticmethod
-    def verify_dfs(graph, user_path) -> bool:
-        if not user_path:
-            return True
-
+    def verify_dfs(graph, user_path) -> list[tuple[int, int]] | bool:
+        """ """
         stack = []
         visited = [False] * graph.get_vertices_count()
-
-        # if len(user_path) >= self.v_count:
-        #     return False
-
         visited[user_path[0]] = True
         stack.append(user_path[0])
         found = False
-        for next_node in range(1, len(user_path)):
-            next_node = user_path[next_node]
+        # путь для подсветки
+        path = []
+        for next_i in range(1, len(user_path)):
+            next_node = user_path[next_i]
             found = False
             while stack:
                 cur_node = stack[-1]
                 if graph.is_edge(cur_node, next_node):
                     if not visited[next_node]:
+                        path.append(tuple(sorted((cur_node, next_node))))
                         visited[next_node] = True
                         stack.append(next_node)
                         found = True
@@ -52,8 +50,13 @@ class Algos:
                 else:
                     stack.pop()
             if not found:
-                return False
-        return True
+                # переход на следующую компоненту
+                if not visited[next_node] and not stack:
+                    visited[next_node] = True
+                    stack.append(next_node)
+                else:
+                    return False
+        return path
 
     # Задача 3
     @staticmethod
@@ -62,52 +65,62 @@ class Algos:
 
     # Задача 4
     @staticmethod
-    def verify_bfs(graph, user_path) -> bool:
-        if not user_path:
-            return True
+    def verify_bfs(graph, user_path) -> list[tuple[int, int]] | bool:
+        """ """
 
         start_vertex = user_path[0]
-
         queue = deque()
         visited = [False] * graph.get_vertices_count()
         visited[start_vertex] = True
         queue.append(start_vertex)
-        i_path = 1
-        while queue and i_path < len(user_path):
-            next_node = user_path[i_path]
-
-            unvisited_neighbors = [
-                v for v, _ in graph.get_neighbors(queue[0]) if not visited[v]
-            ]
-
-            if next_node in unvisited_neighbors:
-                visited[next_node] = True
-                queue.append(next_node)
-                i_path += 1
-            else:
-                if unvisited_neighbors:
-                    return False
-                queue.popleft()
-        return i_path == len(user_path)
+        path = []
+        next_i = 1
+        while next_i < len(user_path):
+            while queue:
+                unvisited_neighbors = [
+                    v for v, _ in graph.get_neighbors(queue[0]) if not visited[v]
+                ]
+                if next_i < len(user_path):
+                    next_node = user_path[next_i]
+                    if next_node in unvisited_neighbors:
+                        path.append(tuple(sorted((queue[0], next_node))))
+                        visited[next_node] = True
+                        queue.append(next_node)
+                        next_i += 1
+                    else:
+                        if unvisited_neighbors:
+                            return False
+                        queue.popleft()
+                else:
+                    if unvisited_neighbors:
+                        return False
+                    queue.popleft()
+            if not queue and next_i < len(user_path):
+                # переход на следующую компоненту
+                start_node = user_path[next_i]
+                if visited[start_node]:
+                    return False  # Узел уже был в другой компоненте
+                visited[start_node] = True
+                queue.append(start_node)
+                next_i += 1
+        return path if next_i == len(user_path) else False
 
     # Задача 5
     @staticmethod
     def get_connected_components_count(graph) -> int:
-        # TODO ЗАГЛУШКА ПОКА НАСТЯ НЕ ДАЛА РЕШЕНИЕ
-        visited = [False] * graph.get_vertices_count()
-        count = 0
-        for i in range(graph.get_vertices_count()):
-            if not visited[i]:
-                count += 1
-                stack = [i]
-                visited[i] = True
-                while stack:
-                    u = stack.pop()
-                    for v, _ in graph.get_neighbors(u):
-                        if not visited[v]:
-                            visited[v] = True
-                            stack.append(v)
-        print(count)
+        # visited = [False] * graph.get_vertices_count()
+        # count = 0
+        # for i in range(graph.get_vertices_count()):
+        #     if not visited[i]:
+        #         count += 1
+        #         stack = [i]
+        #         visited[i] = True
+        #         while stack:
+        #             u = stack.pop()
+        #             for v, _ in graph.get_neighbors(u):
+        #                 if not visited[v]:
+        #                     visited[v] = True
+        #                     stack.append(v)
         return count
 
     # Задача 6
@@ -119,14 +132,12 @@ class Algos:
 
     # Задача 7
     @staticmethod
-    def get_minimal_spanning_tree(Graph) -> list:
+    def get_minimal_spanning_tree(graph) -> list:
         pass
 
     # Задача 8
     @staticmethod
     def get_shortest_paths_from(graph, start_vertex: int) -> list[int]:
-        # TODO проверить, что граф взвешенный
-
         n = graph.get_vertices_count()
         d = [inf] * n
         marked = [False] * n
@@ -178,7 +189,7 @@ class Algos:
 
     # Задача 11
     @staticmethod
-    def decode_prufer(code) -> Graph:
+    def decode_prufer(code) -> graph:
         pass
 
     # Задача 12

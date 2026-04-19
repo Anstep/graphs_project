@@ -24,13 +24,14 @@ with tab1:
 
 with tab2:
     st.subheader("Проверка числа компонент связности")
-    user_input = int(
-        st.text_input("Введите число", placeholder="Напр: 2", key="component_count")
+    user_input = st.text_input(
+        "Введите число", placeholder="Напр: 2", key="component_count"
     )
+
     if st.button("Проверить"):
         try:
             user_input = user_input
-            if Algos.verify_components_count(graph, user_input):
+            if Algos.verify_components_count(graph, int(user_input)):
                 st.balloons()
                 st.success("Верно!")
             else:

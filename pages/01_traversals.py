@@ -32,16 +32,16 @@ with tab1:
 
 with tab2:
     st.subheader("Проверьте свои знания DFS")
-    # TODO ВАЛИДАТОР ВВОДА ОБХОДА
     user_input = st.text_input(
         "Введите обход (через пробел)", placeholder="Напр: 0 1 2 4", key="DFS-validate"
     )
 
     if st.button("Проверить DFS"):
         user_list = list(map(int, user_input.split()))
-        if Algos.verify_dfs(graph, user_list):
+        path = Algos.verify_dfs(graph, user_list)
+        if path:
             st.success("Верно!")
-            st.session_state["traversal_result"] = user_list
+            st.session_state["traversal_result"] = path
         else:
             st.error(f"Неверно. Ваш ввод: {user_input}")
 
@@ -67,9 +67,10 @@ with tab4:
     )
     if st.button("Проверить BFS"):
         user_list = list(map(int, user_input.split()))
-        if Algos.verify_bfs(graph, user_list):
+        path = Algos.verify_bfs(graph, user_list)
+        if path:
             st.success("Верно!")
-            st.session_state["traversal_result"] = user_list
+            st.session_state["traversal_result"] = path
         else:
             st.error(f"Неверно. Ваш ввод: {user_input}")
 
@@ -83,16 +84,6 @@ if "traversal_result" not in st.session_state:
     st.session_state["traversal_result"] = None
 
 # Подсвечиваем путь, если алгоритм был запущен
-traversal_nodes = st.session_state.get("traversal_result", [])
-highlight_edges = []
+traversal_edges = st.session_state.get("traversal_result", [])
 
-# Конвертация последовательности вершин в формат для pyviz
-if traversal_nodes and len(traversal_nodes) > 1:
-    # Создаем пары (u, v) из последовательности вершин
-    highlight_edges = [
-        (traversal_nodes[i], traversal_nodes[i + 1])
-        for i in range(len(traversal_nodes) - 1)
-    ]
-    st.warning(traversal_nodes)
-
-draw_graph(graph, highlight_edges=highlight_edges)
+draw_graph(graph, highlight_edges=traversal_edges)

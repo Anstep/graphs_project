@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+graph.html
+task.pdf
+lib
+uv.lock

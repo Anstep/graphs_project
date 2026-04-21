@@ -116,7 +116,7 @@ def run_graph_input(
 
 def draw_graph(graph, highlight_nodes=None, highlight_edges=None):
     net = Network(height="400px", width="100%", directed=graph.is_directed())
-
+    print(highlight_edges)
     n_vertices = graph.get_vertices_count()
 
     for i in range(n_vertices):

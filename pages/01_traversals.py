@@ -16,17 +16,16 @@ tab1, tab2, tab3, tab4 = st.tabs(
 
 # Обработка
 with tab1:
-    # st.subheader("Демонстрация обхода в глубину")
-    # # Код алгоритма и визуализация для задачи 1
-    # if st.button("Запустить DFS"):
-    #     # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-    #     result = (
-    #         processor.get_dfs(start_node)
-    #         if "DFS" in page
-    #         else processor.get_bfs(start_node)
-    #     )
-    #     st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
-    #     st.session_state["traversal_result"] = result
+    st.subheader("Демонстрация обхода в глубину")
+    user_start_vertex = st.selectbox(
+        label="Вершина",
+        options=[v for v in range(graph.get_vertices_count())],
+        key="dfs_start_vertex",
+    )
+    if st.button("Запустить DFS"):
+        result = Algos.get_dfs(graph, user_start_vertex)
+        st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
+        st.session_state["traversal_result"] = result
     pass
 
 
@@ -47,17 +46,16 @@ with tab2:
 
 
 with tab3:
-    # st.subheader("Демонстрация обхода в ширину")  # TODO
-    # # Код алгоритма и визуализация для задачи 1
-    # if st.button("Запустить BFS"):
-    #     # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-    #     result = (
-    #         processor.get_dfs(start_node)
-    #         if "DFS" in page
-    #         else processor.get_bfs(start_node)
-    #     )
-    #     st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
-    #     st.session_state["traversal_result"] = result
+    st.subheader("Демонстрация обхода в ширину")
+    user_start_vertex = st.selectbox(
+        label="Вершина",
+        options=[v for v in range(graph.get_vertices_count())],
+        key="bfs_start_vertex",
+    )
+    if st.button("Запустить BFS"):
+        result = Algos.get_bfs(graph, user_start_vertex)
+        st.success(f"Порядок обхода: {' → '.join(map(str, result))}")
+        st.session_state["traversal_result"] = result
     pass
 
 with tab4:

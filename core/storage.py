@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 
+import numpy as np
+
 
 class GraphStorage(ABC):
-    # @abstractmethod
-    # def add_edge(self, u, v, w):
-    #     pass
+    @abstractmethod
+    def add_edge(self, u, v, w):
+        pass
 
     @abstractmethod
     def is_edge(self, u, v):
@@ -18,13 +20,17 @@ class GraphStorage(ABC):
     def get_neighbors(self, u):
         pass
 
+    @abstractmethod
+    def get_adj_matrix(self):
+        pass
+
 
 class AdjacencyMatrixStorage(GraphStorage):
     def __init__(self, matrix):
-        self.adj_matrix = matrix
+        self.adj_matrix = np.array(matrix, dtype="float")
 
-    # def add_edge(self, u, v, w = 1):
-    #     self.adj_matrix[u][v] = w
+    def add_edge(self, u, v, w=1):
+        self.adj_matrix[u][v] = w
 
     def is_edge(self, u, v):
         return True if self.adj_matrix[u][v] else False
@@ -38,15 +44,18 @@ class AdjacencyMatrixStorage(GraphStorage):
             (v, self.adj_matrix[u][v])
             for v in range(self.get_vertices_count())
             if self.adj_matrix[u][v] != 0
-        ]
+        ]  # TODO
+
+    def get_adj_matrix(self):
+        return self.adj_matrix.copy()
 
 
 class AdjacencyListStorage(GraphStorage):
     def __init__(self, adj_list):
         self.adj_list = adj_list
 
-    # def add_edge(self, u, v, w):
-    #     self.adj_list[u].append((v, w))
+    def add_edge(self, u, v, w=1):
+        self.adj_list[u].append((v, w))
 
     def is_edge(self, u, v):
         for neighbor, _ in self.adj_list[u]:
@@ -61,6 +70,14 @@ class AdjacencyListStorage(GraphStorage):
 
     def get_neighbors(self, u):
         return [(neighbor, weight) for neighbor, weight in self.adj_list[u]]
+
+    def get_adj_matrix(self):
+        n = self.get_vertices_count()
+        matrix = np.zeros((n, n))
+        for u in range(n):
+            for v, w in self.adj_list[u]:
+                matrix[u][v] = w
+        return matrix
 
 
 # class IncedenceMatrixStorage(GraphStorage):

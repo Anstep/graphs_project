@@ -1,5 +1,6 @@
 import streamlit as st
 
+from core.algorithms import Algos
 from ui_utils import draw_graph, run_graph_input
 
 # Настройка страницы
@@ -19,17 +20,9 @@ tab1 = st.tabs(
 st.subheader("Построение минимального остовного дерева")
 # Код алгоритма и визуализация для задачи 1
 if st.button("Построить"):
-    # Предполагаем, что методы возвращают список вершин: [0, 1, 3...]
-    # error = validate_weighted_graph_constraints(
-    #     viz_matrix, is_directed, "MST", processor
-    # )
-    # if error:
-    #     if "Ошибка" in error:
-    #         st.error(error)
-    #         st.stop()
-    #     else:
-    #         st.warning(error)
-    st.session_state["highlight_edges"] = Algos.get_minimal_spanning_tree()
+    res = Algos.mst_kruskal(graph)
+    res = [tup[:2] for tup in res]
+    st.session_state["highlight_edges"] = res
     st.success("Дерево построено")
 
 # --- Визуализация (универсальный блок) ---

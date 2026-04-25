@@ -1,9 +1,8 @@
 from collections import deque
 from heapq import heappop, heappush
-from math import
+from math import inf
 
 from numpy._typing import NDArray
-from pyarrow import string
 
 
 class Algos:
@@ -20,7 +19,7 @@ class Algos:
         return True
 
     @staticmethod
-    def get_bipartite_status(graph) -> string:
+    def get_bipartite_status(graph) -> str:
         color = [-1] * graph.get_vertices_count()
         # bfs для попытки раскрасить в два цвета
         if color[0] == -1:
@@ -205,48 +204,56 @@ class Algos:
 
     # Задача 8
     @staticmethod
-    def get_shortest_paths_from(graph, start_vertex: int) -> dict | False:
-        # Алгоритм Дейкстры с использованием приоритетной очереди
-        d = [inf] * graph.get_vertices_count()
+    def get_shortest_paths_from(graph, start_vertex: int) -> dict:
+        """
+        Алгоритм Дейкстры с использованием приоритетной очереди
+        Возвращает список предков для подсветки путей
+        """
+        distances = [inf] * graph.get_vertices_count()
         p_queue = []
         heappush(p_queue, (0, start_vertex))
-        d[start_vertex] = 0
-        # массив предков для восстановления пути
+        distances[start_vertex] = 0
+        # Массив предков для восстановления пути
         pred = [None] * graph.get_vertices_count()
         while p_queue:
             cur_d, cur_v = heappop(p_queue)
             # Оптимизация: в очереди могут лежать несколько длин путей для вершины
             # если вынули из кучи "старое" значение, то его не имеет смысл рассматривать
-            if d[cur_v] < cur_d:
+            if distances[cur_v] < cur_d:
                 continue
             for vertex, weight in graph.get_neighbors(cur_v):
                 if weight < 0:
                     raise ValueError("Граф содержит отрицательные веса")
-                if d[vertex] > d[cur_v] + weight:
-                    d[vertex] = d[cur_v] + weight
+                if distances[vertex] > distances[cur_v] + weight:
+                    distances[vertex] = distances[cur_v] + weight
                     pred[vertex] = cur_v
-                    heappush(p_queue, (d[vertex], vertex))
+                    heappush(p_queue, (distances[vertex], vertex))
         return {
-            "distances": [int(val) if val != inf else -1 for val in d],
+            "distances": [int(val) if val != inf else -1 for val in distances],
             "predecessors": pred,
         }
 
     @staticmethod
-    def get_shortest_edges_dijkstra(pred: list[int]) -> list[tuple[int, int]]:
-        edges = []
-        for v, p in enumerate(pred):
-            if p is not None:
-                edges.append(tuple(((p, v))))
-        return edges
+    def get_shortest_edges_dijkstra(
+        graph, pred: list[int | None]
+    ) -> list[tuple[int, int]]:
+        return [
+            tuple(sorted((p, v))) if not graph.is_directed() else (p, v)
+            for v, p in enumerate(pred)
+            if p is not None
+        ]
 
     @staticmethod
-    def reconstruct_path_dijkstra(pred, target):
+    def reconstruct_path_dijkstra(pred, target, start_vertex):
+        # Случай если вершина недостижима
+        if pred[target] is None and target != start_vertex:
+            return []
         path = []
         cur = target
         while cur is not None:
             path.append(cur)
             cur = pred[cur]
-        return path[::-1] if len(path) > 0 else []
+        return path[::-1]
 
     # Задача 9
     @staticmethod
@@ -266,50 +273,62 @@ class Algos:
 
     # Задача 10
     @staticmethod
-    def encode_prufer(graph) -> list | False:
-        # Ref:
-        # https://cp-algorithms.com/graph/pruefer_code.html
-        # https://networkx.org/documentation/stable/_modules/networkx/algorithms/tree/coding.html#to_prufer_sequence
+    def encode_prufer(graph) -> list:
+        """
+        Нахождение кода Прюфера для дерева.
+        Сложность O(n) с использыванием указателя на минимальный индекса.
+        Источники:
+        https://cp-algorithms.com/graph/pruefer_code.html
+        https://networkx.org/documentation/stable/_modules/networkx/algorithms/tree/coding.html#to_prufer_sequence
+        """
         n = graph.get_vertices_count()
         if n < 2:
             return []
-        if not Algos.is_tree(graph):
-            return False
+
+        # if not Algos.is_tree(graph):
+        #     raise ValueError("Граф не является деревом")
+
+        degrees = Algos.get_vertices_degrees(graph)
+        if sum(degrees) != 2 * (n - 1):
+            raise ValueError("Граф не является деревом (неверное количество ребер)")
 
         # вычисление предков через dfs подвешиванием за вершину n - 1
         parent = [-1] * n
+        stack = [n - 1]
+        visited_count = 0
+        parent[n - 1] = n - 1
+        while stack:
+            u = stack.pop()
+            print(u)
+            visited_count += 1
+            for v, _ in graph.get_neighbors(u):
+                if parent[v] == -1:
+                    parent[v] = u
+                    stack.append(v)
 
-        def dfs(v):
-            for u, _ in graph.get_neighbors(v):
-                if u != parent[v]:
-                    parent[u] = v
-                    dfs(u)
+        if visited_count != n:
+            raise ValueError("Граф не является деревом (несвязен)")
 
-        dfs(n - 1)
-
-        # текущий минимальный номер вершины
+        # Текущий минимальный номер вершины
         min_index = -1
         n = graph.get_vertices_count()
-        degree = [-1] * n
-        # вычисление минимального номера вершины
+        # Вычисление минимального номера вершины
         # и заполнение массива степеней за раз
-        for i in range(n):
-            degree[i] = len(graph.get_neighbors(i))
-            if degree[i] == 1 and min_index == -1:
-                min_index = i
+        while min_index < n and degrees[min_index] != 1:
+            min_index += 1
 
         code = []
         leaf = min_index
-        # построение с использованием идее о минимальном номере вершины
+        # Построение с использованием идеи о минимальном номере вершины
         for _ in range(n - 2):
             p = parent[leaf]
             code.append(p)
-            degree[p] -= 1
-            if degree[p] == 1 and p < min_index:
+            degrees[p] -= 1
+            if degrees[p] == 1 and p < min_index:
                 leaf = p
             else:
                 min_index += 1
-                while degree[min_index] != 1:
+                while degrees[min_index] != 1:
                     min_index += 1
                 leaf = min_index
 
@@ -317,16 +336,17 @@ class Algos:
 
     @staticmethod
     def is_tree(graph) -> bool:
-        edges_count = 0
         n = graph.get_vertices_count()
-        for i in range(n):
-            for j in range(i + 1, n):
-                if graph.is_edge(i, j):
-                    edges_count += 1
-
-        if edges_count != n - 1 or Algos.get_connected_components_count(graph) != 1:
+        if n == 0:
             return False
-        return True
+        if n == 1:
+            return len(graph.get_neighbors(0)) == 0
+        # Проверка количества ребер
+        degrees = Algos.get_vertices_degrees(graph)
+        if sum(degrees) != 2 * (n - 1):
+            return False
+        # Проверка связности
+        return Algos.get_connected_components_count(graph) == 1
 
     # Задача 11
     @staticmethod

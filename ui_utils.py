@@ -90,6 +90,7 @@ def draw_graph(
     graph, highlight_nodes=None, highlight_edges=None, node_colors: dict | None = None
 ):
     net = Network(height="400px", width="100%", directed=graph.is_directed())
+
     n_vertices = graph.get_vertices_count()
     palette = [
         "#e6194b",

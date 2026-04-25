@@ -30,21 +30,22 @@ class AdjacencyMatrixStorage(GraphStorage):
         self.adj_matrix = np.array(matrix, dtype="float")
 
     def add_edge(self, u, v, w=1):
-        self.adj_matrix[u][v] = w
+        self.adj_matrix[u, v] = w
 
     def is_edge(self, u, v):
-        return True if self.adj_matrix[u][v] else False
+        return True if self.adj_matrix[u, v] else False
 
     def get_vertices_count(self):
         return self.adj_matrix.shape[0]
 
-    # TODO переписать с numpy
     def get_neighbors(self, u):
-        return [
-            (v, self.adj_matrix[u][v])
-            for v in range(self.get_vertices_count())
-            if self.adj_matrix[u][v] != 0
-        ]  # TODO
+        row = self.adj_matrix[u]
+        # Возвращает кортеж
+        inds = np.where(row != 0)[0]
+
+        weights = row[inds]
+        # tolist для конвертирования в стандартные типы
+        return list(zip(inds.tolist(), weights.tolist()))
 
     def get_adj_matrix(self):
         return self.adj_matrix.copy()
@@ -52,7 +53,8 @@ class AdjacencyMatrixStorage(GraphStorage):
 
 class AdjacencyListStorage(GraphStorage):
     def __init__(self, adj_list):
-        self.adj_list = adj_list
+        # копирование
+        self.adj_list = {u: list(neighbors) for u, neighbors in adj_list.items()}
 
     def add_edge(self, u, v, w=1):
         self.adj_list[u].append((v, w))
@@ -76,7 +78,7 @@ class AdjacencyListStorage(GraphStorage):
         matrix = np.zeros((n, n))
         for u in range(n):
             for v, w in self.adj_list[u]:
-                matrix[u][v] = w
+                matrix[u, v] = w
         return matrix
 
 

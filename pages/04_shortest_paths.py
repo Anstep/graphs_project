@@ -8,7 +8,7 @@ from ui_utils import draw_graph, run_graph_input
 st.set_page_config(layout="wide", page_title="Кратчайшие пути")
 
 # Ввод графа
-graph = run_graph_input(force_weighted=True)
+graph = run_graph_input(force_directed=True, force_weighted=True)
 
 # Выбор алгоритма
 tab1, tab2 = st.tabs(
@@ -26,30 +26,40 @@ with tab1:
         key="vertex_dijkstra",
     )
     if st.button("Найти", key="button_dejikstra"):
-        st.session_state["highlight_edges"] = None
-        res = Algos.get_shortest_paths_from(graph, user_start_vertex)
-        if not res:
-            st.error("Ошибка при расчете (возможно, отрицательные веса)")
-            st.stop()
-        shortest_paths, pred = res
-        cols = st.columns(len(shortest_paths))
-        for i, val in enumerate(shortest_paths):
-            cols[i].metric(f"V{i}", "∞" if val == -1 else val)
-        mode = st.radio(
-            "Режим визуализации:", ["Весь остов (дерево)", "Конкретный путь"]
-        )
-        if mode == "Весь остов (дерево)":
-            st.session_state["highlight_edges"] = Algos.get_shortest_edges_dijkstra(
-                pred
+        try:
+            # Сохраняем весь словарь результатов в сессию
+            st.session_state["dijkstra_results"] = Algos.get_shortest_paths_from(
+                graph, user_start_vertex
             )
-        # else:
-        #     target_v = st.selectbox("До вершины:", range(graph.get_vertices_count()))
-        #     if shortest_paths[target_v] != -1:
-        #         path = Algos.reconstruct_path_dijkstra(pred, target_v)
-        #         path_edges = []
-        #         for i in range(len(path) - 1):
-        #             path_edges.append(tuple(sorted((path[i], path[i + 1]))))
-        #         st.session_state["highlight_edges"] = path_edges
+            st.session_state["highlight_edges"] = None
+        except ValueError as e:
+            st.error(f"Ошибка: {e}")
+            st.session_state["dijkstra_results"] = None
+
+    # Если результаты есть в сессии, отрисовываем их
+    if st.session_state.get("dijkstra_results"):
+        res = st.session_state["dijkstra_results"]
+        dists = res["distances"]
+        preds = res["predecessors"]
+        cols = st.columns(len(dists))
+        for i, d in enumerate(dists):
+            cols[i].metric(f"V{i}", "∞" if d == -1 else d)
+
+        mode = st.radio("Режим визуализации:", ["Весь остов", "До конкретной вершины"])
+
+        if mode == "Весь остов":
+            st.session_state["highlight_edges"] = Algos.get_shortest_edges_dijkstra(
+                preds
+            )
+        else:
+            target = st.selectbox("До вершины:", range(graph.get_vertices_count()))
+            if dists[target] != -1:
+                path = Algos.reconstruct_path_dijkstra(preds, target)
+                # Нужно из списка вершин получить список ребер для подсветки
+                st.session_state["highlight_edges"] = [
+                    tuple(((path[i], path[i + 1]))) for i in range(len(path) - 1)
+                ]
+
 
 with tab2:
     st.subheader("Нахождение матрицы кратчайших путей")

@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.typing import NDArray
 
 
 class InputParsers:
@@ -8,7 +7,7 @@ class InputParsers:
         return df.to_numpy()
 
     @staticmethod
-    def parse_adj_list(df, is_directed, is_weighted):
+    def parse_adj_list(df, is_directed, is_weighted) -> dict:
         adj_list = {}
         for i, row in df.iterrows():
             line = str(row.iloc[0]).strip()
@@ -42,7 +41,7 @@ class InputParsers:
         return df.to_numpy()
 
     @staticmethod
-    def inc_matrix_to_adj_matrix(matrix, is_directed, is_weighted) -> NDArray:
+    def inc_matrix_to_adj_matrix(matrix, is_directed, is_weighted):
         num_vertices = matrix.shape[0]
         num_edges = matrix.shape[1]
         adj_matrix = np.zeros((num_vertices, num_vertices), dtype=int)
@@ -68,7 +67,7 @@ class InputParsers:
         return adj_matrix
 
     @staticmethod
-    def parse_edges_list(edges, n_vertices):
+    def parse_edges_list(edges, n_vertices) -> dict:
         adj_list = {i: [] for i in range(n_vertices)}
         for edge in edges:
             u, v = edge

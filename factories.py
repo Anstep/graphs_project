@@ -11,9 +11,6 @@ from core.validators import (
 class GraphFactory:
     @staticmethod
     def create_from_adj_matrix(input, is_weighted, is_directed):
-        """
-        Создает граф из матрицы смежности.
-        """
         data = InputParsers.parse_adj_matrix(input, is_directed, is_weighted)
         storage = AdjacencyMatrixStorage(data)
 
@@ -23,9 +20,6 @@ class GraphFactory:
 
     @staticmethod
     def create_from_adj_list(input: dict, is_weighted, is_directed):
-        """
-        Создает граф из списка смежности.
-        """
         data = InputParsers.parse_adj_list(input, is_directed, is_weighted)
         storage = AdjacencyListStorage(data)
 
@@ -35,9 +29,6 @@ class GraphFactory:
 
     @staticmethod
     def create_from_inc_matrix(input, is_weighted, is_directed):
-        """
-        Создает граф из матрицы инцидентности.
-        """
         data = InputParsers.parse_inc_matrix(input, is_directed, is_weighted)
 
         adj_matrix = InputParsers.inc_matrix_to_adj_matrix(

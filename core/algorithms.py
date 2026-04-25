@@ -1,23 +1,50 @@
 from collections import deque
 from heapq import heappop, heappush
-from math import inf
+from math import
 
 from numpy._typing import NDArray
+from pyarrow import string
 
 
 class Algos:
     # Задача 0
     @staticmethod
-    def get_vertices_degrees(graph):
-        pass
+    def get_vertices_degrees(graph) -> list:
+        return [len(graph.get_neighbors(u)) for u in range(graph.get_vertices_count())]
 
     @staticmethod
-    def get_eulerian_status(graph):
-        pass
+    def is_eulerian(graph) -> bool:
+        for u in range(graph.get_vertices_count()):
+            if len(graph.get_neighbors(u)) % 2 != 0:
+                return False
+        return True
 
     @staticmethod
-    def get_bipartite_status(graph):
-        pass
+    def get_bipartite_status(graph) -> string:
+        color = [-1] * graph.get_vertices_count()
+        # bfs для попытки раскрасить в два цвета
+        if color[0] == -1:
+            color[0] = 0
+            queue = deque()
+            queue.append(0)
+            while queue:
+                u = queue.popleft()
+                for v, _ in graph.get_neighbors(u):
+                    if color[v] == -1:
+                        color[v] = 1 - color[u]
+                        queue.append(v)
+                    elif color[v] == color[u]:
+                        return "none"
+        count = 0
+        # если все вершины раскрасились (одна компонента), то граф двудольный
+        for u in range(len(color)):
+            if color[u] == -1:
+                return "simple"
+            count += color[u]
+        # Для полноты проверяем необходимое число ребер: 2 * n1 * n2 = числу ребер
+        if sum(Algos.get_vertices_degrees(graph)) != 2 * (len(color) - count) * count:
+            return "simple"
+        return "complete"
 
     # Задача 1
     @staticmethod
@@ -43,7 +70,6 @@ class Algos:
         visited[user_path[0]] = True
         stack.append(user_path[0])
         found = False
-        # путь для подсветки
         path = []
         for next_i in range(1, len(user_path)):
             next_node = user_path[next_i]
@@ -179,9 +205,7 @@ class Algos:
 
     # Задача 8
     @staticmethod
-    def get_shortest_paths_from(
-        graph, start_vertex: int
-    ) -> tuple[list[int], list[int]] | False:
+    def get_shortest_paths_from(graph, start_vertex: int) -> dict | False:
         # Алгоритм Дейкстры с использованием приоритетной очереди
         d = [inf] * graph.get_vertices_count()
         p_queue = []
@@ -197,17 +221,15 @@ class Algos:
                 continue
             for vertex, weight in graph.get_neighbors(cur_v):
                 if weight < 0:
-                    return False
+                    raise ValueError("Граф содержит отрицательные веса")
                 if d[vertex] > d[cur_v] + weight:
                     d[vertex] = d[cur_v] + weight
                     pred[vertex] = cur_v
                     heappush(p_queue, (d[vertex], vertex))
-        return [int(val) if val != inf else -1 for val in d], pred
-
-    @staticmethod
-    def is_tree(graph):
-        if Algos.get_connected_components_count(graph) != 1:
-            return False
+        return {
+            "distances": [int(val) if val != inf else -1 for val in d],
+            "predecessors": pred,
+        }
 
     @staticmethod
     def get_shortest_edges_dijkstra(pred: list[int]) -> list[tuple[int, int]]:
@@ -216,6 +238,15 @@ class Algos:
             if p is not None:
                 edges.append(tuple(((p, v))))
         return edges
+
+    @staticmethod
+    def reconstruct_path_dijkstra(pred, target):
+        path = []
+        cur = target
+        while cur is not None:
+            path.append(cur)
+            cur = pred[cur]
+        return path[::-1] if len(path) > 0 else []
 
     # Задача 9
     @staticmethod
@@ -242,20 +273,8 @@ class Algos:
         n = graph.get_vertices_count()
         if n < 2:
             return []
-
-        # edges_count = 0
-        # adj_matrix = graph.get_adj_matrix()
-        # for i in range(n):
-        #     for j in range(i + 1, n):
-        #         if adj_matrix[i][j] > 0:
-        #             edges_count += 1
-
-        # if edges_count != n - 1 or Algos.get_connected_components_count(graph) != 1:
-        #     return False
-
-        # особый случай
-        if n == 2:
-            return []
+        if not Algos.is_tree(graph):
+            return False
 
         # вычисление предков через dfs подвешиванием за вершину n - 1
         parent = [-1] * n
@@ -295,6 +314,19 @@ class Algos:
                 leaf = min_index
 
         return code
+
+    @staticmethod
+    def is_tree(graph) -> bool:
+        edges_count = 0
+        n = graph.get_vertices_count()
+        for i in range(n):
+            for j in range(i + 1, n):
+                if graph.is_edge(i, j):
+                    edges_count += 1
+
+        if edges_count != n - 1 or Algos.get_connected_components_count(graph) != 1:
+            return False
+        return True
 
     # Задача 11
     @staticmethod

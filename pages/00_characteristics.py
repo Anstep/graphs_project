@@ -1,8 +1,5 @@
 import numpy as np
-import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
-from pyvis.network import Network
 
 from core.algorithms import Algos
 from ui_utils import draw_graph, run_graph_input
@@ -11,14 +8,12 @@ from ui_utils import draw_graph, run_graph_input
 st.set_page_config(layout="wide", page_title="Характеристики графа")
 
 # Ввод графа
-graph = run_graph_input()
+graph = run_graph_input(force_directed=False, force_weighted=False)
 
 # Обработка и вывод
 st.subheader("Характеристики графа")
-if st.button("Рассчитать характеристики", type="primary"):
-    st.session_state.calculated = True
 
-if st.session_state.get("calculated"):
+if st.button("Рассчитать характеристики", type="primary"):
     st.divider()
 
     # 1.Степени вершин
@@ -41,7 +36,7 @@ if st.session_state.get("calculated"):
         st.info(f"{comp_count}")
 
     with col2:
-        is_euler = Algos.get_eulerian_status(graph)
+        is_euler = Algos.is_eulerian(graph)
         st.write("**Эйлеровость:**")
         if is_euler:
             st.success(f"Эйлеров")
@@ -49,12 +44,14 @@ if st.session_state.get("calculated"):
             st.warning(f"Не Эйлеров")
 
     with col3:
-        is_bipartite = Algos.get_bipartite_status(graph)
+        bipartite_status = Algos.get_bipartite_status(graph)
         st.write("**Двудольность:**")
-        if is_bipartite:
-            st.success("Граф двудольный")
-        else:
+        if bipartite_status == "none":
             st.warning("Не двудольный")
+        elif bipartite_status == "simple":
+            st.success("Обычный двудольный")
+        else:
+            st.success("Полный двудольный")
 
 
 # --- Визуализация (универсальный блок) ---

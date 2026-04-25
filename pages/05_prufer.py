@@ -21,9 +21,11 @@ tab1, tab2 = st.tabs(
 with tab1:
     st.subheader("Найти код прюфера")
     if st.button("Найти"):
-        result = Algos.encode_prufer(graph)
-
-        st.success(f"Код: {' '.join(map(str, result))}")
+        res = Algos.encode_prufer(graph)
+        if not res:
+            st.error("Ошибка построения. Скорее всего граф не является деревом")
+            st.stop()
+        st.success(f"Код: {' '.join(map(str, res))}")
 
 with tab2:
     st.subheader("Декодировать код прюфера")
@@ -41,7 +43,7 @@ with tab2:
             edges=edges_list, n_vertices=len(code) + 2
         )
 
-        st.success(f"Дерево успешно восстановлено!")
+        st.success(f"Дерево успешно восстановлено")
         st.write(f"Ребра: {edges_list}")
         # except Exception as e:
         #    st.error(f"Ошибка при декодировании: {e}")

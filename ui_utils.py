@@ -8,31 +8,6 @@ from pyvis.network import Network
 
 from factories import GraphFactory
 
-# TODO
-# def validate_weighted_graph_constraints(
-#     matrix: np.ndarray, is_directed, algorithm, processor
-# ) -> str | None:
-#     """
-#     Валидация для взвешенных графов.
-#     Проверяет:
-#     - Отсутствие отрицательных весов (критично для Дейкстры)
-#     - Связность графа (критично для MST)
-#     - Корректность весовых меток
-#     Возвращает текст ошибки или None.
-#     """
-#     if algorithm == "Dijkstra":
-#         if np.any(matrix < 0):
-#             return "Ошибка: Алгоритм Дейкстры не поддерживает отрицательные веса ребер."
-
-#     if algorithm == "MST":
-#         # if is_directed:
-#         #     return "Ошибка: Алгоритм построения MST (Прима/Краскала) предназначен для неориентированных графов."
-#         if processor and processor.get_connected_components_count() > 1:
-#             return "Предупреждение: Граф несвязен. Алгоритм построит минимальный остовный лес (набор деревьев для каждой компоненты)."
-
-#     if algorithm == "Floyd":
-#         pass
-
 
 def create_graph_from_ui(input_data, input_type, is_directed, is_weighted):
     """Оркестратор создания объекта графа из данных UI."""

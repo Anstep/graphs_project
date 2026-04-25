@@ -175,7 +175,6 @@ class Algos:
                 for node in groups:
                     if groups[node] == old_group:
                         groups[node] = new_group
-        print(mst)
         return mst
 
     # Задача 8
@@ -321,5 +320,25 @@ class Algos:
 
     # Задача 12
     @staticmethod
-    def get_coloring(Graph):
-        pass
+    def get_coloring(graph) -> dict:
+        result = [-1] * graph.get_vertices_count()
+        result[0] = 0
+        available = [False] * graph.get_vertices_count()
+
+        for u in range(1, graph.get_vertices_count()):
+            for v in range(graph.get_vertices_count()):
+                if graph.is_edge(u, v) > 0 and result[v] != -1:
+                    available[result[v]] = True
+
+            color = 0
+            while color < graph.get_vertices_count():
+                if not available[color]:
+                    break
+                color += 1
+            result[u] = color
+
+            for v in range(graph.get_vertices_count()):
+                if graph.is_edge(u, v) > 0 and result[v] != -1:
+                    available[result[v]] = False
+
+        return {node: color for node, color in enumerate(result)}

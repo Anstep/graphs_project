@@ -8,31 +8,30 @@ from pyvis.network import Network
 
 from factories import GraphFactory
 
-
 # TODO
-def validate_weighted_graph_constraints(
-    matrix: np.ndarray, is_directed, algorithm, processor
-) -> str | None:
-    """
-    Валидация для взвешенных графов.
-    Проверяет:
-    - Отсутствие отрицательных весов (критично для Дейкстры)
-    - Связность графа (критично для MST)
-    - Корректность весовых меток
-    Возвращает текст ошибки или None.
-    """
-    if algorithm == "Dijkstra":
-        if np.any(matrix < 0):
-            return "Ошибка: Алгоритм Дейкстры не поддерживает отрицательные веса ребер."
+# def validate_weighted_graph_constraints(
+#     matrix: np.ndarray, is_directed, algorithm, processor
+# ) -> str | None:
+#     """
+#     Валидация для взвешенных графов.
+#     Проверяет:
+#     - Отсутствие отрицательных весов (критично для Дейкстры)
+#     - Связность графа (критично для MST)
+#     - Корректность весовых меток
+#     Возвращает текст ошибки или None.
+#     """
+#     if algorithm == "Dijkstra":
+#         if np.any(matrix < 0):
+#             return "Ошибка: Алгоритм Дейкстры не поддерживает отрицательные веса ребер."
 
-    if algorithm == "MST":
-        # if is_directed:
-        #     return "Ошибка: Алгоритм построения MST (Прима/Краскала) предназначен для неориентированных графов."
-        if processor and processor.get_connected_components_count() > 1:
-            return "Предупреждение: Граф несвязен. Алгоритм построит минимальный остовный лес (набор деревьев для каждой компоненты)."
+#     if algorithm == "MST":
+#         # if is_directed:
+#         #     return "Ошибка: Алгоритм построения MST (Прима/Краскала) предназначен для неориентированных графов."
+#         if processor and processor.get_connected_components_count() > 1:
+#             return "Предупреждение: Граф несвязен. Алгоритм построит минимальный остовный лес (набор деревьев для каждой компоненты)."
 
-    if algorithm == "Floyd":
-        pass
+#     if algorithm == "Floyd":
+#         pass
 
 
 def create_graph_from_ui(input_data, input_type, is_directed, is_weighted):
@@ -55,9 +54,7 @@ def create_graph_from_ui(input_data, input_type, is_directed, is_weighted):
         return None
 
 
-def run_graph_input(
-    force_directed: bool | None = None, force_weighted: bool | None = None
-):
+def run_graph_input(force_directed=None, force_weighted=None):
     with st.sidebar:
         st.subheader("Конфигурация")
         n_vertices = st.number_input("Число вершин", 1, 20, 5)
@@ -114,15 +111,44 @@ def run_graph_input(
     return create_graph_from_ui(edited_df, input_type, is_directed, is_weighted)
 
 
-def draw_graph(graph, highlight_nodes=None, highlight_edges=None):
+def draw_graph(
+    graph, highlight_nodes=None, highlight_edges=None, node_colors: dict | None = None
+):
     net = Network(height="400px", width="100%", directed=graph.is_directed())
-    print(highlight_edges)
     n_vertices = graph.get_vertices_count()
-
+    palette = [
+        "#e6194b",
+        "#3cb44b",
+        "#ffe119",
+        "#4363d8",
+        "#f58231",
+        "#911eb4",
+        "#46f0f0",
+        "#f032e6",
+        "#bcf60c",
+        "#fabebe",
+        "#008080",
+        "#e6beff",
+        "#9a6324",
+        "#fffac8",
+        "#800000",
+        "#aaffc3",
+        "#808000",
+        "#ffd8b1",
+        "#000075",
+        "#808080",
+    ]
+    # формирование вершин и раскраска
     for i in range(n_vertices):
-        color = "#ff4b4b" if highlight_nodes and i in highlight_nodes else "#55ff00"
+        color = "#55ff00"
+        if node_colors is not None and i in node_colors:
+            color_idx = node_colors[i]
+            color = palette[color_idx % len(palette)]
+        elif highlight_nodes and i in highlight_nodes:
+            color = "#ff4b4b"
         net.add_node(i, label=f"V{i}", color=color)
 
+    # формирование ребер
     for u in range(n_vertices):
         for v, weight in graph.get_neighbors(u):
             # Для неориентированного графа рисуем ребро один раз
@@ -135,8 +161,9 @@ def draw_graph(graph, highlight_nodes=None, highlight_edges=None):
                 edge_color = "#ff4b4b"
                 width = 3
 
-            label = str(weight) if str(weight) != "1" else None
+            label = None
+            if graph.is_weighted():
+                label = str(weight)
             net.add_edge(u, v, color=edge_color, width=width, label=label)
-
     net.save_graph("graph.html")
     components.html(open("graph.html", "r").read(), height=450)

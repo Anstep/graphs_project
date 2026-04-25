@@ -10,7 +10,7 @@ st.set_page_config(layout="wide", page_title="Кратчайшие пути")
 # Ввод графа
 graph = run_graph_input(force_weighted=True)
 
-# Algo selection
+# Выбор алгоритма
 tab1, tab2 = st.tabs(
     [
         "8. Нахождение кратчайших путей от вершины",
@@ -25,12 +25,7 @@ with tab1:
         options=[v for v in range(graph.get_vertices_count())],
         key="vertex_dijkstra",
     )
-    if st.button("Найти", key="button_dejikstra"):  # TODO
-        # error = validate_weighted_graph_constraints(viz_matrix, is_directed, "Dijkstra")
-        # if error:
-        #     st.error(error)
-        #     st.stop()
-
+    if st.button("Найти", key="button_dejikstra"):
         st.session_state["highlight_edges"] = None
         res = Algos.get_shortest_paths_from(graph, user_start_vertex)
         if not res:

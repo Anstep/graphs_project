@@ -4,8 +4,12 @@ from numpy._typing import NDArray
 
 
 class BaseGraph(ABC):
-    def __init__(self, storage):
+    def __init__(self, storage, is_weighted=False):
         self._storage = storage
+        self._is_weighted = is_weighted
+
+    def is_weighted(self) -> bool:
+        return self._is_weighted
 
     @property
     @abstractmethod
@@ -26,6 +30,9 @@ class BaseGraph(ABC):
 
 
 class UndirectedGraph(BaseGraph):
+    def __init__(self, storage, is_weighted=False):
+        super().__init__(storage, is_weighted=is_weighted)
+
     def is_directed(self):
         return False
 
@@ -34,6 +41,9 @@ class UndirectedGraph(BaseGraph):
 
 
 class DirectedGraph(BaseGraph):
+    def __init__(self, storage, is_weighted=False):
+        super().__init__(storage, is_weighted=is_weighted)
+
     def is_directed(self):
         return True
 

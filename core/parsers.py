@@ -52,7 +52,7 @@ class InputParsers:
             # крайне удобная функция numpy
             idxs = np.where(col != 0)[0]
 
-            if len(idxs) == 0:
+            if len(idxs) != 2:
                 continue
 
             if is_directed:
@@ -66,3 +66,14 @@ class InputParsers:
                 adj_matrix[u][v] = w
                 adj_matrix[v][u] = w
         return adj_matrix
+
+    @staticmethod
+    def parse_edges_list(edges, n_vertices):
+        adj_list = {i: [] for i in range(n_vertices)}
+        for edge in edges:
+            u, v = edge
+            w = 1
+
+            adj_list[u].append((v, w))
+            adj_list[v].append((u, w))
+        return adj_list

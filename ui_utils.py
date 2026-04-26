@@ -26,7 +26,7 @@ def create_graph_from_ui(input_data, input_type, is_directed, is_weighted):
             )
     except ValueError as e:
         st.error(f"Ошибка в данных: {e}")
-        return None
+        st.stop()
 
 
 def run_graph_input(force_directed=None, force_weighted=None):
@@ -116,12 +116,12 @@ def draw_graph(
     ]
     # Формирование вершин и раскраска
     for i in range(n_vertices):
-        color = "#55ff00"
+        color = "#55ff00"  # Зеленый
         if node_colors is not None and i in node_colors:
             color_idx = node_colors[i]
             color = palette[color_idx % len(palette)]
         elif highlight_nodes and i in highlight_nodes:
-            color = "#ff4b4b"
+            color = "#ff4b4b"  # Красный
         net.add_node(i, label=f"V{i}", color=color)
 
     # Формирование ребер
@@ -132,10 +132,10 @@ def draw_graph(
             if not graph.is_directed() and u > v:
                 continue
 
-            edge_color = "#aaaaaa"
+            edge_color = "#aaaaaa"  # Серый
             width = 1
             if highlight_edges and (u, v) in highlight_edges:
-                edge_color = "#ff4b4b"
+                edge_color = "#ff4b4b"  # Красный
                 width = 3
 
             label = None

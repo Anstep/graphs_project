@@ -4,7 +4,7 @@ import numpy as np
 class InputParsers:
     @staticmethod
     def parse_adj_matrix(df, is_directed, is_weighted):
-        return df.to_numpy()
+        return df.to_numpy().astype(int)
 
     @staticmethod
     def parse_adj_list(df, is_directed, is_weighted) -> dict:
@@ -30,7 +30,9 @@ class InputParsers:
                                 f"Вершина {i}: ожидался формат v:w для '{part}'"
                             )
                         v_str, w_str = part.split(":")
-                        neighbors.append((int(v_str.strip()), float(w_str.strip())))
+                        neighbors.append(
+                            (int(v_str.strip()), int(float(w_str.strip())))
+                        )
                     else:
                         neighbors.append((int(part), 1))
             adj_list[i] = neighbors
@@ -38,7 +40,7 @@ class InputParsers:
 
     @staticmethod
     def parse_inc_matrix(df, is_directed, is_weighted):
-        return df.to_numpy()
+        return df.to_numpy().astype(int)
 
     @staticmethod
     def inc_matrix_to_adj_matrix(matrix, is_directed, is_weighted):
@@ -46,9 +48,9 @@ class InputParsers:
         num_edges = matrix.shape[1]
         adj_matrix = np.zeros((num_vertices, num_vertices), dtype=int)
         for j in range(num_edges):
-            # получаем соответствующий столбец
+            # Получаем соответствующий столбец
             col = matrix[:, j]
-            # крайне удобная функция numpy
+            # Крайне удобная функция numpy
             idxs = np.where(col != 0)[0]
 
             if len(idxs) != 2:

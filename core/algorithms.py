@@ -64,18 +64,27 @@ class Algos:
     # Задача 2
     @staticmethod
     def verify_dfs(graph, user_path) -> list[tuple[int, int]] | bool:
+        """
+        Основная идея — имитировать работу стека и возможность возврата.
+        Работает для нескольких компонент связности
+        """
+        if not user_path:
+            return False
         stack = []
         visited = [False] * graph.get_vertices_count()
+        # Инициализируем первую вершину пут
         visited[user_path[0]] = True
         stack.append(user_path[0])
         found = False
         path = []
+        # Проходим по всем остальным вершинам в пользовательском пути
         for next_i in range(1, len(user_path)):
             next_node = user_path[next_i]
             found = False
             while stack:
-                cur_node = stack[-1]
+                cur_node = stack[-1]  # Смотрим на текущую вершину на вершине стека
                 if graph.is_edge(cur_node, next_node):
+                    # Если вершина еще не посещена — это корректный шаг вглубь
                     if not visited[next_node]:
                         path.append(tuple(sorted((cur_node, next_node))))
                         visited[next_node] = True
@@ -83,15 +92,19 @@ class Algos:
                         found = True
                         break
                     else:
+                        # Если ребро есть, но вершина уже посещена
                         return False
                 else:
+                    # Если из текущей вершины нет ребра к следующей,
+                    # делаем "откат"
                     stack.pop()
             if not found:
-                # переход на следующую компоненту
+                # Если стек пуст, но путь продолжается, проверяем, не новая ли это компонента связности
                 if not visited[next_node] and not stack:
                     visited[next_node] = True
                     stack.append(next_node)
                 else:
+                    # Если возможности начать новую компоненту
                     return False
         return path
 
@@ -116,41 +129,54 @@ class Algos:
     # Задача 4
     @staticmethod
     def verify_bfs(graph, user_path) -> list[tuple[int, int]] | bool:
+        """
+        Если в user_path указана вершина, которая не является соседом текущей,
+        при этом у текущей еще есть свободные соседи, то обход считается неверным.
+        """
+        if not user_path:
+            return False
         start_vertex = user_path[0]
         queue = deque()
         visited = [False] * graph.get_vertices_count()
         visited[start_vertex] = True
         queue.append(start_vertex)
         path = []
-        next_i = 1
+        next_i = 1  # Указатель на следующую ожидаемую вершину в user_path
         while next_i < len(user_path):
             while queue:
+                # Получаем список всех соседей текущей вершины, которые еще не были посещены
                 unvisited_neighbors = [
                     v for v, _ in graph.get_neighbors(queue[0]) if not visited[v]
                 ]
                 if next_i < len(user_path):
                     next_node = user_path[next_i]
+                    # Если следующая вершина в пути пользователя является соседом текущей
                     if next_node in unvisited_neighbors:
                         path.append(tuple(sorted((queue[0], next_node))))
                         visited[next_node] = True
                         queue.append(next_node)
                         next_i += 1
                     else:
+                        # Если у текущей вершины еще остались непосещенные соседи,
+                        # но пользователь выбрал другую вершину
                         if unvisited_neighbors:
                             return False
+                        # Если соседей не осталось, переходим к следующей вершине в очереди
                         queue.popleft()
                 else:
+                    # Завершение проверки, если путь закончился
                     if unvisited_neighbors:
                         return False
                     queue.popleft()
+            # Обработка несвязных графов, пытаемся снова начать обход
             if not queue and next_i < len(user_path):
-                # переход на следующую компоненту
                 start_node = user_path[next_i]
                 if visited[start_node]:
                     return False  # Узел уже был в другой компоненте
                 visited[start_node] = True
                 queue.append(start_node)
                 next_i += 1
+        # И в конце проверяем, что мы прошли ровно столько вершин, сколько ввел пользователь
         return path if next_i == len(user_path) else False
 
     # Задача 5
@@ -207,7 +233,7 @@ class Algos:
     def get_shortest_paths_from(graph, start_vertex: int) -> dict:
         """
         Алгоритм Дейкстры с использованием приоритетной очереди
-        Возвращает список предков для подсветки путей
+        Возвращает словарь со списком расстояний и список предков для подсветки путей
         """
         distances = [inf] * graph.get_vertices_count()
         p_queue = []
@@ -217,7 +243,7 @@ class Algos:
         pred = [None] * graph.get_vertices_count()
         while p_queue:
             cur_d, cur_v = heappop(p_queue)
-            # Оптимизация: в очереди могут лежать несколько длин путей для вершины
+            # В очереди могут лежать несколько длин путей для одной вершины
             # если вынули из кучи "старое" значение, то его не имеет смысл рассматривать
             if distances[cur_v] < cur_d:
                 continue
@@ -269,14 +295,16 @@ class Algos:
                 for j in range(graph.get_vertices_count()):
                     if dist[i][j] > dist[i][k] + dist[k][j]:
                         dist[i][j] = dist[i][k] + dist[k][j]
-        return dist
+        dist[dist == float("inf")] = -1
+        return dist.astype(int)
 
     # Задача 10
     @staticmethod
     def encode_prufer(graph) -> list:
         """
         Нахождение кода Прюфера для дерева.
-        Сложность O(n) с использыванием указателя на минимальный индекса.
+        Сложность O(n) с использыванием указателя на минимальную возможную вершину.
+        Возвращает список с кодом
         Источники:
         https://cp-algorithms.com/graph/pruefer_code.html
         https://networkx.org/documentation/stable/_modules/networkx/algorithms/tree/coding.html#to_prufer_sequence

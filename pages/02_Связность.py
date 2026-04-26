@@ -7,7 +7,7 @@ from ui_utils import draw_graph, run_graph_input
 st.set_page_config(layout="wide", page_title="Компоненты")
 
 # Ввод графа
-graph = run_graph_input()
+graph = run_graph_input(force_directed=False)
 
 # Algo selection
 tab1, tab2 = st.tabs(

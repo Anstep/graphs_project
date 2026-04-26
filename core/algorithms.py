@@ -299,7 +299,6 @@ class Algos:
         parent[n - 1] = n - 1
         while stack:
             u = stack.pop()
-            print(u)
             visited_count += 1
             for v, _ in graph.get_neighbors(u):
                 if parent[v] == -1:
@@ -310,7 +309,7 @@ class Algos:
             raise ValueError("Граф не является деревом (несвязен)")
 
         # Текущий минимальный номер вершины
-        min_index = -1
+        min_index = 0
         n = graph.get_vertices_count()
         # Вычисление минимального номера вершины
         # и заполнение массива степеней за раз

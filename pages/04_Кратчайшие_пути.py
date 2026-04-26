@@ -18,7 +18,7 @@ tab1, tab2 = st.tabs(
     ]
 )
 
-# if st.sidebar.button("🎲 Сгенерировать случайный"):
+# if st.sidebar.button("Сгенерировать случайный"):
 #     # Логика заполнения st.session_state.matrix_editor случайными 0 и 1
 #     pass
 
@@ -60,10 +60,16 @@ with tab1:
             target = st.selectbox("До вершины:", range(graph.get_vertices_count()))
             if dists[target] != -1:
                 path = Algos.reconstruct_path_dijkstra(preds, target, user_start_vertex)
-                # Из списка вершин нужно получить список ребер для подсветки
+                # Сортируем кортеж для неориентированного графа,
+                # хотя для всего остова сортировка в get_shortest_edges_dijkstra
                 st.session_state["highlight_edges"] = [
-                    tuple(((path[i], path[i + 1]))) for i in range(len(path) - 1)
+                    tuple(sorted((path[i], path[i + 1])))
+                    if not graph.is_directed()
+                    else (path[i], path[i + 1])
+                    for i in range(len(path) - 1)
                 ]
+            else:
+                st.session_state["highlight_edges"] = []
 
 
 with tab2:

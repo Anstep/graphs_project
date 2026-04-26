@@ -114,7 +114,7 @@ def draw_graph(
         "#000075",
         "#808080",
     ]
-    # формирование вершин и раскраска
+    # Формирование вершин и раскраска
     for i in range(n_vertices):
         color = "#55ff00"
         if node_colors is not None and i in node_colors:
@@ -124,10 +124,11 @@ def draw_graph(
             color = "#ff4b4b"
         net.add_node(i, label=f"V{i}", color=color)
 
-    # формирование ребер
+    # Формирование ребер
     for u in range(n_vertices):
         for v, weight in graph.get_neighbors(u):
             # Для неориентированного графа рисуем ребро один раз
+            # Требует симметричности
             if not graph.is_directed() and u > v:
                 continue
 
@@ -143,3 +144,11 @@ def draw_graph(
             net.add_edge(u, v, color=edge_color, width=width, label=label)
     net.save_graph("graph.html")
     components.html(open("graph.html", "r").read(), height=450)
+
+
+def show_qr():
+    url = "http://godhunt.space:8501/"
+    qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={url}"
+    with st.sidebar:
+        st.divider()
+        st.image(qr_api_url, caption="Открыть приложение на телефоне")

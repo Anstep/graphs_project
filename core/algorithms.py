@@ -98,13 +98,21 @@ class Algos:
                     # Если из текущей вершины нет ребра к следующей,
                     # делаем "откат"
                     stack.pop()
-            if not found:
-                # Если стек пуст, но путь продолжается, проверяем, не новая ли это компонента связности
-                if not visited[next_node] and not stack:
-                    visited[next_node] = True
-                    stack.append(next_node)
+                if not found:
+                    if not visited[next_node] and not stack:
+                        # Если к этой вершине есть ребро из любой уже посещенной,
+                        # то это не новая компонента, а ошибка обхода
+                        is_new = True
+                        for v_prev in range(graph.get_vertices_count()):
+                            if visited[v_prev] and graph.is_edge(v_prev, next_node):
+                                is_new = False
+                                break
+                        if is_new:
+                            visited[next_node] = True
+                            stack.append(next_node)
+                        else:
+                            return False
                 else:
-                    # Если возможности начать новую компоненту
                     return False
         return path
 
@@ -173,6 +181,10 @@ class Algos:
                 start_node = user_path[next_i]
                 if visited[start_node]:
                     return False  # Узел уже был в другой компоненте
+                # Действительно ли это новая компонента?
+                for v_prev in range(graph.get_vertices_count()):
+                    if visited[v_prev] and graph.is_edge(v_prev, start_node):
+                        return False  # Можно было дойти из старой компоненты
                 visited[start_node] = True
                 queue.append(start_node)
                 next_i += 1

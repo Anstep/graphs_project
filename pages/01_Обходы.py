@@ -13,6 +13,13 @@ graph = run_graph_input(force_weighted=False, force_directed=False)
 tab1, tab2, tab3, tab4 = st.tabs(
     ["1. Построение DFS", "2. Проверка DFS", "3. Построение BFS", "4. Проверка BFS"]
 )
+if "last_graph_bytes_traversal" not in st.session_state:
+    st.session_state["last_graph_bytes_traversal"] = None
+
+current_graph_bytes = graph.get_adj_matrix().tobytes()
+if st.session_state["last_graph_bytes_traversal"] != current_graph_bytes:
+    st.session_state["traversal_result"] = None
+    st.session_state["last_graph_bytes_traversal"] = current_graph_bytes
 
 # Обработка
 with tab1:

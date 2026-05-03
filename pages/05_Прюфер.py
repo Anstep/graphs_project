@@ -2,7 +2,7 @@ import streamlit as st
 
 from core.algorithms import Algos
 from factories import GraphFactory
-from ui_utils import apply_custom_styles, draw_graph, run_graph_input
+from ui_utils import draw_graph, run_graph_input
 
 # Настройка страницы
 st.set_page_config(layout="wide", page_title="Прюфер")

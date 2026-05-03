@@ -7,7 +7,7 @@ from ui_utils import draw_graph, run_graph_input
 st.set_page_config(layout="wide", page_title="Обходы")
 
 # Ввод графа
-graph = run_graph_input(force_weighted=False)
+graph = run_graph_input(force_weighted=False, force_directed=False)
 
 # Выбор алгоритма
 tab1, tab2, tab3, tab4 = st.tabs(
@@ -81,7 +81,6 @@ st.subheader("Визуализация")
 if "traversal_result" not in st.session_state:
     st.session_state["traversal_result"] = None
 
-# Подсвечиваем путь, если алгоритм был запущен
 traversal_edges = st.session_state.get("traversal_result", [])
-
+print(traversal_edges)
 draw_graph(graph, highlight_edges=traversal_edges)

@@ -49,7 +49,7 @@ def run_graph_input(force_directed=None, force_weighted=None):
         )
 
         if st.button("Случайный"):
-            matrix = (np.random.rand(n_vertices, n_vertices) < 0.4).astype(int)
+            matrix = (np.random.rand(n_vertices, n_vertices) < 0.3).astype(int)
             if is_weighted:
                 weights = np.random.randint(1, 11, size=(n_vertices, n_vertices))
                 matrix = matrix * weights
@@ -119,6 +119,15 @@ def draw_graph(
     graph, highlight_nodes=None, highlight_edges=None, node_colors: dict | None = None
 ):
     net = Network(height="400px", width="100%", directed=graph.is_directed())
+
+    net.barnes_hut(
+        gravity=-2000,  # Сила отталкивания (чем меньше число, тем сильнее отталкиваются)
+        central_gravity=0.3,  # Сила притяжения к центру
+        spring_length=150,  # Длина пружин (расстояние между узлами)
+        spring_strength=0.05,  # Жесткость пружин
+        damping=0.09,  # Затухание (чтобы граф быстрее останавливался)
+        overlap=0,  # Запрет на перекрытие узлов
+    )
 
     n_vertices = graph.get_vertices_count()
     # Набор цветов для раскраски

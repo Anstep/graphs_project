@@ -18,10 +18,6 @@ tab1, tab2 = st.tabs(
     ]
 )
 
-# if st.sidebar.button("Сгенерировать случайный"):
-#     # Логика заполнения st.session_state.matrix_editor случайными 0 и 1
-#     pass
-
 with tab1:
     st.subheader("Нахождение кратчайших путей от вершины")
     user_start_vertex = st.selectbox(

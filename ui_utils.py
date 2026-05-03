@@ -48,7 +48,7 @@ def run_graph_input(force_directed=None, force_weighted=None):
             ["Матрица смежности", "Список смежности", "Матрица инцидентности"],
         )
 
-        if st.button("Сгенерировать случайный"):
+        if st.button("Случайный"):
             matrix = (np.random.rand(n_vertices, n_vertices) < 0.4).astype(int)
             if is_weighted:
                 weights = np.random.randint(1, 11, size=(n_vertices, n_vertices))
@@ -152,7 +152,12 @@ def draw_graph(
             color = palette[color_idx % len(palette)]
         elif highlight_nodes and i in highlight_nodes:
             color = "#ff4b4b"  # Красный
-        net.add_node(i, label=f"V{i}", color=color)
+        net.add_node(
+            i,
+            label=f"V{i}",
+            color=color,
+            font={"size": 20, "face": "Arial", "weight": "bold"},
+        )
 
     # Формирование ребер
     for u in range(n_vertices):
@@ -170,8 +175,21 @@ def draw_graph(
 
             label = None
             if graph.is_weighted():
-                label = str(weight)
-            net.add_edge(u, v, color=edge_color, width=width, label=label)
+                label = str(int(weight))
+            net.add_edge(
+                u,
+                v,
+                color=edge_color,
+                width=width,
+                label=label,
+                font={
+                    "size": 18,
+                    "color": "#000000",
+                    "align": "top",
+                    "strokeWidth": 2,
+                    "strokeColor": "#ffffff",
+                },
+            )
     net.save_graph("graph.html")
     with open("graph.html", "r", encoding="utf-8") as f:
         html_content = f.read()
@@ -185,7 +203,7 @@ def draw_graph(
 
 
 def show_qr():
-    url = "http://godhunt.space:8501/"
+    url = "http://91.108.243.173:8501/"
     qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={url}"
     with st.sidebar:
         st.divider()

@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#d33682" # Яркий акцентный цвет (маджента хорошо видна)
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEEEEE"
+textColor = "#000000"
+font = "sans serif"

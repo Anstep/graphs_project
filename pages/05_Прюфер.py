@@ -63,7 +63,7 @@ st.subheader("Визуализация")
 # логика переключения между восстановленным и исходными графами
 if st.session_state.get("decoded_graph") is not None:
     st.info("Отображается дерево, восстановленное из кода Прюфера.")
-    if st.button("Показать исходный граф"):
+    if st.button("Вернуться к исходному графу"):
         st.session_state["decoded_graph"] = None
         st.rerun()
     graph = st.session_state["decoded_graph"]

@@ -48,12 +48,41 @@ def run_graph_input(force_directed=None, force_weighted=None):
             ["Матрица смежности", "Список смежности", "Матрица инцидентности"],
         )
 
+        if st.button("Сгенерировать случайный"):
+            matrix = (np.random.rand(n_vertices, n_vertices) < 0.4).astype(int)
+            if is_weighted:
+                weights = np.random.randint(1, 11, size=(n_vertices, n_vertices))
+                matrix = matrix * weights
+
+            # Делаем симметричной для неориентированного графа
+            if not is_directed:
+                matrix = np.tril(matrix, -1)
+                matrix = matrix + matrix.T
+            # Убираем петли для ориентированного
+            else:
+                np.fill_diagonal(matrix, 0)
+
+            # Сохраняем в сессию для инициализации редакторов
+            st.session_state["temp_matrix"] = pd.DataFrame(matrix)
+
+            # Сброс состояния редакторов
+            for key in ["matrix_editor", "adj_list_editor", "inc_editor"]:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.rerun()
+
     with st.expander(f"Редактирование графа ({input_type})", expanded=True):
         st.subheader("Конфигурация графа")
         edited_df = []
         # Матрица
         if input_type == "Матрица смежности":
-            init_data = pd.DataFrame(np.zeros((n_vertices, n_vertices), dtype=int))
+            if (
+                "temp_matrix" in st.session_state
+                and st.session_state["temp_matrix"].shape[0] == n_vertices
+            ):
+                init_data = st.session_state["temp_matrix"]
+            else:
+                init_data = pd.DataFrame(np.zeros((n_vertices, n_vertices), dtype=int))
             edited_df = st.data_editor(init_data, key="matrix_editor")
 
         # Список смежности
@@ -92,6 +121,7 @@ def draw_graph(
     net = Network(height="400px", width="100%", directed=graph.is_directed())
 
     n_vertices = graph.get_vertices_count()
+    # Набор цветов для раскраски
     palette = [
         "#e6194b",
         "#3cb44b",
@@ -143,7 +173,15 @@ def draw_graph(
                 label = str(weight)
             net.add_edge(u, v, color=edge_color, width=width, label=label)
     net.save_graph("graph.html")
-    components.html(open("graph.html", "r").read(), height=450)
+    with open("graph.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    components.html(html_content, height=450)
+    st.download_button(
+        label="Скачать визуализацию (HTML)",
+        data=html_content,
+        file_name="graph_visualization.html",
+        mime="text/html",
+    )
 
 
 def show_qr():

@@ -2,7 +2,7 @@ import streamlit as st
 
 from core.algorithms import Algos
 from factories import GraphFactory
-from ui_utils import draw_graph, run_graph_input, show_qr
+from ui_utils import apply_custom_styles, draw_graph, run_graph_input
 
 # Настройка страницы
 st.set_page_config(layout="wide", page_title="Прюфер")
@@ -69,4 +69,4 @@ if st.session_state.get("decoded_graph") is not None:
     graph = st.session_state["decoded_graph"]
 
 draw_graph(graph)
-show_qr()
+# apply_custom_styles()

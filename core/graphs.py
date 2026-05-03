@@ -11,7 +11,6 @@ class BaseGraph(ABC):
     def is_weighted(self) -> bool:
         return self._is_weighted
 
-    @property
     @abstractmethod
     def is_directed(self):
         pass
